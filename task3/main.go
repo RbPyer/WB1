@@ -3,30 +3,27 @@ package main
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 )
 
 
 func main() {
 	var (
-		s int
-		data [5]int = [5]int{2, 4, 6, 8, 10}
-		mu sync.Mutex = sync.Mutex{}
-		wg sync.WaitGroup = sync.WaitGroup{}
+		s atomic.Int32
+		data [5]int32 = [5]int32{2, 4, 6, 8, 10}
 	)
-
+	wg := new(sync.WaitGroup)
 	wg.Add(5)
 	for i := 0; i < 5; i++ {
-		go add(data[i], &s, &mu, &wg)
+		go add(data[i], &s, wg)
 	}
 
 	wg.Wait()
-	fmt.Println(s)
+	fmt.Println(s.Load())
 }
 
 
-func add(num int, s *int, mu *sync.Mutex, wg *sync.WaitGroup) {
-	mu.Lock()
-	*s += num * num
-	mu.Unlock()
+func add(num int32, s *atomic.Int32, wg *sync.WaitGroup) {
+	s.Add(num * num)
 	wg.Done()
 }
