@@ -38,11 +38,11 @@ func main() {
 	fmt.Printf("%d workers are ready for job!\n", workersCount)
 	wg.Add(workersCount + 1)
 
-	for _, worker := range wp.Pool {
+	for i, _ := range wp.Pool {
 		go func(w *Worker) {
 			defer wg.Done()
 			w.Work(ctx, ch)
-		}(&worker)
+		}(&wp.Pool[i])
 	}
 
 	go func(ctx context.Context, c chan<- int, wg *sync.WaitGroup) {
